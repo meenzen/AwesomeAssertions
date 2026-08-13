@@ -2996,9 +2996,6 @@ namespace AwesomeAssertions.Types
     {
         public MethodInfoSelector(System.Collections.Generic.IEnumerable<System.Type> types) { }
         public MethodInfoSelector(System.Type type) { }
-        public AwesomeAssertions.Types.MethodInfoSelector ThatArePublicOrInternal { get; }
-        public AwesomeAssertions.Types.MethodInfoSelector ThatDoNotReturnVoid { get; }
-        public AwesomeAssertions.Types.MethodInfoSelector ThatReturnVoid { get; }
         public System.Collections.Generic.IEnumerator<System.Reflection.MethodInfo> GetEnumerator() { }
         public AwesomeAssertions.Types.TypeSelector ReturnTypes() { }
         public AwesomeAssertions.Types.MethodInfoSelector ThatAreAbstract() { }
@@ -3015,10 +3012,13 @@ namespace AwesomeAssertions.Types
             where TAttribute : System.Attribute { }
         public AwesomeAssertions.Types.MethodInfoSelector ThatAreNotStatic() { }
         public AwesomeAssertions.Types.MethodInfoSelector ThatAreNotVirtual() { }
+        public AwesomeAssertions.Types.MethodInfoSelector ThatArePublicOrInternal() { }
         public AwesomeAssertions.Types.MethodInfoSelector ThatAreStatic() { }
         public AwesomeAssertions.Types.MethodInfoSelector ThatAreVirtual() { }
         public AwesomeAssertions.Types.MethodInfoSelector ThatDoNotReturn<TReturn>() { }
+        public AwesomeAssertions.Types.MethodInfoSelector ThatDoNotReturnVoid() { }
         public AwesomeAssertions.Types.MethodInfoSelector ThatReturn<TReturn>() { }
+        public AwesomeAssertions.Types.MethodInfoSelector ThatReturnVoid() { }
         public System.Reflection.MethodInfo[] ToArray() { }
     }
     public class MethodInfoSelectorAssertions
@@ -3103,25 +3103,25 @@ namespace AwesomeAssertions.Types
     {
         public PropertyInfoSelector(System.Collections.Generic.IEnumerable<System.Type> types) { }
         public PropertyInfoSelector(System.Type type) { }
-        public AwesomeAssertions.Types.PropertyInfoSelector ThatAreAbstract { get; }
-        public AwesomeAssertions.Types.PropertyInfoSelector ThatAreNotAbstract { get; }
-        public AwesomeAssertions.Types.PropertyInfoSelector ThatAreNotStatic { get; }
-        public AwesomeAssertions.Types.PropertyInfoSelector ThatAreNotVirtual { get; }
-        public AwesomeAssertions.Types.PropertyInfoSelector ThatArePublicOrInternal { get; }
-        public AwesomeAssertions.Types.PropertyInfoSelector ThatAreStatic { get; }
-        public AwesomeAssertions.Types.PropertyInfoSelector ThatAreVirtual { get; }
         public System.Collections.Generic.IEnumerator<System.Reflection.PropertyInfo> GetEnumerator() { }
         public AwesomeAssertions.Types.PropertyInfoSelector NotOfType<TReturn>() { }
         public AwesomeAssertions.Types.PropertyInfoSelector OfType<TReturn>() { }
         public AwesomeAssertions.Types.TypeSelector ReturnTypes() { }
+        public AwesomeAssertions.Types.PropertyInfoSelector ThatAreAbstract() { }
         public AwesomeAssertions.Types.PropertyInfoSelector ThatAreDecoratedWith<TAttribute>()
             where TAttribute : System.Attribute { }
         public AwesomeAssertions.Types.PropertyInfoSelector ThatAreDecoratedWithOrInherit<TAttribute>()
             where TAttribute : System.Attribute { }
+        public AwesomeAssertions.Types.PropertyInfoSelector ThatAreNotAbstract() { }
         public AwesomeAssertions.Types.PropertyInfoSelector ThatAreNotDecoratedWith<TAttribute>()
             where TAttribute : System.Attribute { }
         public AwesomeAssertions.Types.PropertyInfoSelector ThatAreNotDecoratedWithOrInherit<TAttribute>()
             where TAttribute : System.Attribute { }
+        public AwesomeAssertions.Types.PropertyInfoSelector ThatAreNotStatic() { }
+        public AwesomeAssertions.Types.PropertyInfoSelector ThatAreNotVirtual() { }
+        public AwesomeAssertions.Types.PropertyInfoSelector ThatArePublicOrInternal() { }
+        public AwesomeAssertions.Types.PropertyInfoSelector ThatAreStatic() { }
+        public AwesomeAssertions.Types.PropertyInfoSelector ThatAreVirtual() { }
         public System.Reflection.PropertyInfo[] ToArray() { }
     }
     public class PropertyInfoSelectorAssertions

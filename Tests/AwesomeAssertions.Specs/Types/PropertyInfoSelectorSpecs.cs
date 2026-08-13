@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using AwesomeAssertions.Types;
 using Internal.Main.Test;
@@ -75,7 +76,7 @@ public class PropertyInfoSelectorSpecs
         Type type = typeof(TestClassForPropertySelectorWithInternalAndPublicProperties);
 
         // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatArePublicOrInternal.ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatArePublicOrInternal().ToArray();
 
         // Assert
         properties.Should().HaveCount(2);
@@ -88,7 +89,7 @@ public class PropertyInfoSelectorSpecs
         Type type = typeof(TestClassForPropertySelector);
 
         // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreAbstract.ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreAbstract().ToArray();
 
         // Assert
         properties.Should().HaveCount(2);
@@ -101,7 +102,7 @@ public class PropertyInfoSelectorSpecs
         Type type = typeof(TestClassForPropertySelector);
 
         // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreNotAbstract.ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreNotAbstract().ToArray();
 
         // Assert
         properties.Should().HaveCount(10);
@@ -114,7 +115,7 @@ public class PropertyInfoSelectorSpecs
         Type type = typeof(TestClassForPropertySelector);
 
         // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreStatic.ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreStatic().ToArray();
 
         // Assert
         properties.Should().HaveCount(4);
@@ -127,7 +128,7 @@ public class PropertyInfoSelectorSpecs
         Type type = typeof(TestClassForPropertySelector);
 
         // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreNotStatic.ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreNotStatic().ToArray();
 
         // Assert
         properties.Should().HaveCount(8);
@@ -140,7 +141,7 @@ public class PropertyInfoSelectorSpecs
         Type type = typeof(TestClassForPropertySelector);
 
         // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreVirtual.ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreVirtual().ToArray();
 
         // Assert
         properties.Should().HaveCount(7);
@@ -153,7 +154,7 @@ public class PropertyInfoSelectorSpecs
         Type type = typeof(TestClassForPropertySelector);
 
         // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreNotVirtual.ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreNotVirtual().ToArray();
 
         // Assert
         properties.Should().HaveCount(5);
@@ -360,7 +361,7 @@ public class PropertyInfoSelectorSpecs
 
             // Act
             IEnumerable<PropertyInfo> properties = type.Properties()
-                .ThatArePublicOrInternal
+                .ThatArePublicOrInternal()
                 .OfType<string>()
                 .ThatAreDecoratedWith<DummyPropertyAttribute>()
                 .ToArray();
@@ -376,12 +377,14 @@ public class PropertyInfoSelectorSpecs
             Type type = typeof(TestClassForPublicSetter);
 
             // Act
-            IEnumerable<PropertyInfo> properties = type.Properties().ThatArePublicOrInternal.ToArray();
+            IEnumerable<PropertyInfo> properties = type.Properties().ThatArePublicOrInternal().ToArray();
 
             // Assert
             properties.Should().HaveCount(3);
         }
 
+        [SuppressMessage("ReSharper", "NotAccessedField.Local")]
+        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         private class TestClassForPublicSetter
         {
             private static string myPrivateStaticStringField;
@@ -400,12 +403,13 @@ public class PropertyInfoSelectorSpecs
             Type type = typeof(TestClassForPrivateAccessors);
 
             // Act
-            IEnumerable<PropertyInfo> properties = type.Properties().ThatArePublicOrInternal.ToArray();
+            IEnumerable<PropertyInfo> properties = type.Properties().ThatArePublicOrInternal().ToArray();
 
             // Assert
             properties.Should().HaveCount(4);
         }
 
+        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         private class TestClassForPrivateAccessors
         {
             public bool PublicBoolPrivateGet { private get; set; }
@@ -421,6 +425,9 @@ public class PropertyInfoSelectorSpecs
 
 #region Internal classes used in unit tests
 
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMember.Local
+// ReSharper disable NotAccessedField.Local
 internal class TestClassForPropertySelectorWithInternalAndPublicProperties
 {
     public static string PublicStaticStringProperty { get; }

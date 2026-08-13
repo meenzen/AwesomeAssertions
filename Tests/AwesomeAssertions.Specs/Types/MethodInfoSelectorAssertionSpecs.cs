@@ -135,7 +135,7 @@ public class MethodInfoSelectorAssertionSpecs
             // Arrange
             MethodInfoSelector methodSelector =
                 new MethodInfoSelector(typeof(ClassWithMethodsThatAreNotDecoratedWithDummyAttribute))
-                    .ThatArePublicOrInternal;
+                    .ThatArePublicOrInternal();
 
             // Act
             Action act = () =>
@@ -200,7 +200,7 @@ public class MethodInfoSelectorAssertionSpecs
             // Arrange
             MethodInfoSelector methodSelector =
                 new MethodInfoSelector(typeof(ClassWithAllMethodsDecoratedWithDummyAttribute))
-                    .ThatArePublicOrInternal;
+                    .ThatArePublicOrInternal();
 
             // Act
             Action act = () =>

@@ -6,6 +6,21 @@ classes: wide
 sidebar:
   nav: "sidebar"
 ---
+## Unreleased v10
+
+### Breaking Changes (for users)
+* Changed the following members from property to method for consistency - [#604](https://github.com/AwesomeAssertions/AwesomeAssertions/pull/604)
+  * `MethodInfoSelector.ThatArePublicOrInternal()`
+  * `MethodInfoSelector.ThatReturnVoid()`
+  * `MethodInfoSelector.ThatHaveParameter()`
+  * `PropertyInfoSelector.ThatArePublicOrInternal()`
+  * `PropertyInfoSelector.ThatHaveGetter()`
+  * `PropertyInfoSelector.ThatHaveSetter()`
+  * `PropertyInfoSelector.ThatHaveGetterOrSetter()`
+  * `PropertyInfoSelector.ThatHaveGetterAndSetter()`
+  * `PropertyInfoSelector.ThatHaveGetterAndNoSetter()`
+  * `PropertyInfoSelector.ThatHaveNoGetterAndSetter()`
+
 ## Unreleased
 
 ### What's new

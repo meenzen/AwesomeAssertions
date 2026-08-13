@@ -121,7 +121,7 @@ public class PropertyInfoSelectorAssertionSpecs
         {
             // Arrange
             var propertyInfoSelector = new PropertyInfoSelector(typeof(ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute))
-                .ThatArePublicOrInternal;
+                .ThatArePublicOrInternal();
 
             // Act
             Action act = () =>
@@ -171,7 +171,7 @@ public class PropertyInfoSelectorAssertionSpecs
         {
             // Arrange
             var propertyInfoSelector = new PropertyInfoSelector(typeof(ClassWithAllPropertiesDecoratedWithDummyAttribute))
-                .ThatArePublicOrInternal;
+                .ThatArePublicOrInternal();
 
             // Act
             Action act = () =>
