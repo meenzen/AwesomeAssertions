@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.10.0" />
-    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="2.3.3" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="2.4.0" />
     <PackageReference Include="PolySharp" Version="1.16.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
