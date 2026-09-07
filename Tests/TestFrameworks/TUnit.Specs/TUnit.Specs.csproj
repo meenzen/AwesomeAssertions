@@ -13,7 +13,7 @@
   <ItemGroup>
     <!-- Please note, that TUnit has direct dependencies
      to Microsoft.Testing.Extensions.CodeCoverage and Microsoft.Testing.Extensions.TrxReport -->
-    <PackageReference Include="TUnit" Version="1.65.68" />
+    <PackageReference Include="TUnit" Version="1.66.27" />
   </ItemGroup>
 
 </Project>
