@@ -77,7 +77,7 @@ public class MethodInfoSelectorSpecs
         Type type = typeof(TestClassForMethodSelector);
 
         // Act
-        IEnumerable<MethodInfo> methods = type.Methods().ThatArePublicOrInternal;
+        IEnumerable<MethodInfo> methods = type.Methods().ThatArePublicOrInternal();
 
         // Assert
         const int PublicMethodCount = 2;
@@ -147,7 +147,7 @@ public class MethodInfoSelectorSpecs
         Type type = typeof(TestClassForMethodSelector);
 
         // Act
-        IEnumerable<MethodInfo> methods = type.Methods().ThatReturnVoid.ToArray();
+        IEnumerable<MethodInfo> methods = type.Methods().ThatReturnVoid().ToArray();
 
         // Assert
         methods.Should().HaveCount(4);
@@ -160,7 +160,7 @@ public class MethodInfoSelectorSpecs
         Type type = typeof(TestClassForMethodSelector);
 
         // Act
-        IEnumerable<MethodInfo> methods = type.Methods().ThatDoNotReturnVoid.ToArray();
+        IEnumerable<MethodInfo> methods = type.Methods().ThatDoNotReturnVoid().ToArray();
 
         // Assert
         methods.Should().HaveCount(3);
@@ -174,8 +174,8 @@ public class MethodInfoSelectorSpecs
 
         // Act
         IEnumerable<MethodInfo> methods = type.Methods()
-            .ThatArePublicOrInternal
-            .ThatReturnVoid
+            .ThatArePublicOrInternal()
+            .ThatReturnVoid()
             .ToArray();
 
         // Assert
@@ -443,6 +443,7 @@ public class MethodInfoSelectorSpecs
 
 #region Internal classes used in unit tests
 
+// ReSharper disable UnusedMember.Local
 internal class TestClassForMethodSelector
 {
 #pragma warning disable 67, S3264 // "event is never used"

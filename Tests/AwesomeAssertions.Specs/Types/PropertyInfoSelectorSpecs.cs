@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using AwesomeAssertions.Types;
 using Internal.Main.Test;
@@ -75,7 +76,7 @@ public class PropertyInfoSelectorSpecs
         Type type = typeof(TestClassForPropertySelectorWithInternalAndPublicProperties);
 
         // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatArePublicOrInternal.ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatArePublicOrInternal().ToArray();
 
         // Assert
         properties.Should().HaveCount(2);
@@ -88,7 +89,7 @@ public class PropertyInfoSelectorSpecs
         Type type = typeof(TestClassForPropertySelector);
 
         // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreAbstract.ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreAbstract().ToArray();
 
         // Assert
         properties.Should().HaveCount(2);
@@ -101,7 +102,7 @@ public class PropertyInfoSelectorSpecs
         Type type = typeof(TestClassForPropertySelector);
 
         // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreNotAbstract.ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreNotAbstract().ToArray();
 
         // Assert
         properties.Should().HaveCount(10);
@@ -114,7 +115,7 @@ public class PropertyInfoSelectorSpecs
         Type type = typeof(TestClassForPropertySelector);
 
         // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreStatic.ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreStatic().ToArray();
 
         // Assert
         properties.Should().HaveCount(4);
@@ -127,7 +128,7 @@ public class PropertyInfoSelectorSpecs
         Type type = typeof(TestClassForPropertySelector);
 
         // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreNotStatic.ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreNotStatic().ToArray();
 
         // Assert
         properties.Should().HaveCount(8);
@@ -140,7 +141,7 @@ public class PropertyInfoSelectorSpecs
         Type type = typeof(TestClassForPropertySelector);
 
         // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreVirtual.ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreVirtual().ToArray();
 
         // Assert
         properties.Should().HaveCount(7);
@@ -153,7 +154,7 @@ public class PropertyInfoSelectorSpecs
         Type type = typeof(TestClassForPropertySelector);
 
         // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreNotVirtual.ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreNotVirtual().ToArray();
 
         // Assert
         properties.Should().HaveCount(5);
@@ -191,27 +192,31 @@ public class PropertyInfoSelectorSpecs
     [Fact]
     public void When_selecting_methods_that_return_a_specific_type_it_should_return_only_the_applicable_methods()
     {
-        // Arrange
         Type type = typeof(TestClassForPropertySelector);
 
-        // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().OfType<string>().ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().OfType<string>();
 
-        // Assert
         properties.Should().HaveCount(8);
     }
 
     [Fact]
     public void When_selecting_methods_that_do_not_return_a_specific_type_it_should_return_only_the_applicable_methods()
     {
-        // Arrange
         Type type = typeof(TestClassForPropertySelector);
 
-        // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().NotOfType<string>().ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().NotOfType<string>();
 
-        // Assert
         properties.Should().HaveCount(4);
+    }
+
+    [Fact]
+    public void When_selecting_methods_that_return_a_specific_type_and_not_return_no_property_is_returned()
+    {
+        Type type = typeof(TestClassForPropertySelector);
+
+        IEnumerable<PropertyInfo> properties = type.Properties().OfType<string>().NotOfType<string>();
+
+        properties.Should().BeEmpty();
     }
 
     [Fact]
@@ -232,14 +237,11 @@ public class PropertyInfoSelectorSpecs
     public void
         When_selecting_properties_decorated_with_or_inheriting_an_inheritable_attribute_it_should_only_return_the_applicable_properties()
     {
-        // Arrange
         Type type = typeof(TestClassForPropertySelectorWithInheritableAttributeDerived);
 
-        // Act
         IEnumerable<PropertyInfo> properties =
-            type.Properties().ThatAreDecoratedWithOrInherit<DummyPropertyAttribute>().ToArray();
+            type.Properties().ThatAreDecoratedWithOrInherit<DummyPropertyAttribute>();
 
-        // Assert
         properties.Should().ContainSingle();
     }
 
@@ -247,14 +249,23 @@ public class PropertyInfoSelectorSpecs
     public void
         When_selecting_properties_not_decorated_with_an_inheritable_attribute_it_should_only_return_the_applicable_properties()
     {
-        // Arrange
         Type type = typeof(TestClassForPropertySelectorWithInheritableAttributeDerived);
 
-        // Act
-        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreNotDecoratedWith<DummyPropertyAttribute>().ToArray();
+        IEnumerable<PropertyInfo> properties = type.Properties().ThatAreNotDecoratedWith<DummyPropertyAttribute>();
 
-        // Assert
         properties.Should().ContainSingle();
+    }
+
+    [Fact]
+    public void When_selecting_properties_that_are_decorated_and_not_decorated_no_property_is_returned()
+    {
+        Type type = typeof(TestClassForPropertySelectorWithInheritableAttributeDerived);
+
+        IEnumerable<PropertyInfo> properties = type.Properties()
+            .ThatAreDecoratedWithOrInherit<DummyPropertyAttribute>()
+            .ThatAreNotDecoratedWithOrInherit<DummyPropertyAttribute>();
+
+        properties.Should().BeEmpty();
     }
 
     [Fact]
@@ -360,7 +371,7 @@ public class PropertyInfoSelectorSpecs
 
             // Act
             IEnumerable<PropertyInfo> properties = type.Properties()
-                .ThatArePublicOrInternal
+                .ThatArePublicOrInternal()
                 .OfType<string>()
                 .ThatAreDecoratedWith<DummyPropertyAttribute>()
                 .ToArray();
@@ -376,12 +387,14 @@ public class PropertyInfoSelectorSpecs
             Type type = typeof(TestClassForPublicSetter);
 
             // Act
-            IEnumerable<PropertyInfo> properties = type.Properties().ThatArePublicOrInternal.ToArray();
+            IEnumerable<PropertyInfo> properties = type.Properties().ThatArePublicOrInternal().ToArray();
 
             // Assert
             properties.Should().HaveCount(3);
         }
 
+        [SuppressMessage("ReSharper", "NotAccessedField.Local")]
+        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         private class TestClassForPublicSetter
         {
             private static string myPrivateStaticStringField;
@@ -400,12 +413,13 @@ public class PropertyInfoSelectorSpecs
             Type type = typeof(TestClassForPrivateAccessors);
 
             // Act
-            IEnumerable<PropertyInfo> properties = type.Properties().ThatArePublicOrInternal.ToArray();
+            IEnumerable<PropertyInfo> properties = type.Properties().ThatArePublicOrInternal().ToArray();
 
             // Assert
             properties.Should().HaveCount(4);
         }
 
+        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         private class TestClassForPrivateAccessors
         {
             public bool PublicBoolPrivateGet { private get; set; }
@@ -421,6 +435,9 @@ public class PropertyInfoSelectorSpecs
 
 #region Internal classes used in unit tests
 
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMember.Local
+// ReSharper disable NotAccessedField.Local
 internal class TestClassForPropertySelectorWithInternalAndPublicProperties
 {
     public static string PublicStaticStringProperty { get; }

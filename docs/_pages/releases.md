@@ -22,6 +22,17 @@ sidebar:
 * The reference to `System.Threading.Tasks.Extensions` to has been upgraded to version 4.6.3 - [#603](https://github.com/AwesomeAssertions/AwesomeAssertions/pull/603)
 * Enable [PureAttribute](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.contracts.pureattribute) in the public API - [#605](https://github.com/AwesomeAssertions/AwesomeAssertions/pull/605)
   * It is declared as a breaking change because it may raise warnings like [CA1806](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1806).
+* Changed the following members from property to method for consistency - [#604](https://github.com/AwesomeAssertions/AwesomeAssertions/pull/604)
+  * `MethodInfoSelector.ThatArePublicOrInternal()`
+  * `MethodInfoSelector.ThatReturnVoid()`
+  * `MethodInfoSelector.ThatHaveParameter()`
+  * `PropertyInfoSelector.ThatArePublicOrInternal()`
+  * `PropertyInfoSelector.ThatHaveGetter()`
+  * `PropertyInfoSelector.ThatHaveSetter()`
+  * `PropertyInfoSelector.ThatHaveGetterOrSetter()`
+  * `PropertyInfoSelector.ThatHaveGetterAndSetter()`
+  * `PropertyInfoSelector.ThatHaveGetterAndNoSetter()`
+  * `PropertyInfoSelector.ThatHaveNoGetterAndSetter()`
 * The result of `ThrowAsync`, `ThrowExactlyAsync` and `ThrowWithinAsync` has changed to `ExceptionAssertionsTask<TException>` instead of `Task<ExceptionAssertions<TException>>`. - [#592](https://github.com/AwesomeAssertions/AwesomeAssertions/pull/592)
   * This allows the use of `WithInnerException` and `WithInnerExceptionExactly` with a single type parameter, just like their synchronous counterparts.
 * Removed the extension methods on `Task<ExceptionAssertions<TException>>` (`WithMessage`, `Where`, `WithInnerException`, `WithInnerExceptionExactly` and `WithParameterName`), since none of the assertions returns that type anymore. - [#592](https://github.com/AwesomeAssertions/AwesomeAssertions/pull/592)

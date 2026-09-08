@@ -43,42 +43,34 @@ public class MethodInfoSelector : IEnumerable<MethodInfo>
     /// <summary>
     /// Only select the methods that are public or internal.
     /// </summary>
-    public MethodInfoSelector ThatArePublicOrInternal
+    public MethodInfoSelector ThatArePublicOrInternal()
     {
-        get
-        {
-            selectedMethods = selectedMethods.Where(method => method.IsPublic || method.IsAssembly);
-            return this;
-        }
+        selectedMethods = selectedMethods.Where(method => method.IsPublic || method.IsAssembly);
+        return this;
     }
 
     /// <summary>
     /// Only select the methods without a return value
     /// </summary>
-    public MethodInfoSelector ThatReturnVoid
+    public MethodInfoSelector ThatReturnVoid()
     {
-        get
-        {
-            selectedMethods = selectedMethods.Where(method => method.ReturnType == typeof(void));
-            return this;
-        }
+        selectedMethods = selectedMethods.Where(method => method.ReturnType == typeof(void));
+        return this;
     }
 
     /// <summary>
     /// Only select the methods with a return value
     /// </summary>
-    public MethodInfoSelector ThatDoNotReturnVoid
+    public MethodInfoSelector ThatDoNotReturnVoid()
     {
-        get
-        {
-            selectedMethods = selectedMethods.Where(method => method.ReturnType != typeof(void));
-            return this;
-        }
+        selectedMethods = selectedMethods.Where(method => method.ReturnType != typeof(void));
+        return this;
     }
 
     /// <summary>
     /// Only select the methods that return the specified type
     /// </summary>
+    /// <typeparam name="TReturn">The type of the return value.</typeparam>
     public MethodInfoSelector ThatReturn<TReturn>()
     {
         selectedMethods = selectedMethods.Where(method => method.ReturnType == typeof(TReturn));
@@ -88,6 +80,7 @@ public class MethodInfoSelector : IEnumerable<MethodInfo>
     /// <summary>
     /// Only select the methods that do not return the specified type
     /// </summary>
+    /// <typeparam name="TReturn">The type of the return value.</typeparam>
     public MethodInfoSelector ThatDoNotReturn<TReturn>()
     {
         selectedMethods = selectedMethods.Where(method => method.ReturnType != typeof(TReturn));
@@ -97,6 +90,7 @@ public class MethodInfoSelector : IEnumerable<MethodInfo>
     /// <summary>
     /// Only select the methods that are decorated with an attribute of the specified type.
     /// </summary>
+    /// <typeparam name="TAttribute">The type of the attribute.</typeparam>
     public MethodInfoSelector ThatAreDecoratedWith<TAttribute>()
         where TAttribute : Attribute
     {
@@ -107,6 +101,7 @@ public class MethodInfoSelector : IEnumerable<MethodInfo>
     /// <summary>
     /// Only select the methods that are decorated with, or inherits from a parent class, an attribute of the specified type.
     /// </summary>
+    /// <typeparam name="TAttribute">The type of the attribute.</typeparam>
     public MethodInfoSelector ThatAreDecoratedWithOrInherit<TAttribute>()
         where TAttribute : Attribute
     {
@@ -117,6 +112,7 @@ public class MethodInfoSelector : IEnumerable<MethodInfo>
     /// <summary>
     /// Only select the methods that are not decorated with an attribute of the specified type.
     /// </summary>
+    /// <typeparam name="TAttribute">The type of the attribute.</typeparam>
     public MethodInfoSelector ThatAreNotDecoratedWith<TAttribute>()
         where TAttribute : Attribute
     {
@@ -127,6 +123,7 @@ public class MethodInfoSelector : IEnumerable<MethodInfo>
     /// <summary>
     /// Only select the methods that are not decorated with and does not inherit from a parent class, an attribute of the specified type.
     /// </summary>
+    /// <typeparam name="TAttribute">The type of the attribute.</typeparam>
     public MethodInfoSelector ThatAreNotDecoratedWithOrInherit<TAttribute>()
         where TAttribute : Attribute
     {

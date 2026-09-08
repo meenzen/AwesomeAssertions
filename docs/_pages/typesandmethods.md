@@ -40,8 +40,8 @@ Like this:
 
 ```csharp
 typeof(MyPresentationModel).Methods()
-  .ThatArePublicOrInternal 
-  .ThatReturnVoid
+  .ThatArePublicOrInternal() 
+  .ThatReturnVoid()
   .Should()
   .BeVirtual("because this is required to intercept exceptions")
     .And.BeWritable()
@@ -104,7 +104,7 @@ var types = typeof(ClassWithSomeAttribute).Assembly.Types()
 
 types.Should().BeInNamespace("Internal.Main.Test.ISomeInterfaceTests");
 
-var properties = types.Properties().ThatArePublicOrInternal;
+var properties = types.Properties().ThatArePublicOrInternal();
 properties.Should().BeVirtual();
 ```
 
