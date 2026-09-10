@@ -106,6 +106,30 @@ If the first assertion fails, you'll get something like this:
 
     Expected the month part of the date to be January, but found a <null> DateOnly.
 
+## Reusing assertions
+
+Most assertions come in pairs, where the negative one is exactly the opposite of the positive one. Instead of writing that
+opposite logic a second time, you can hand the **positive** assertion to `ForFailingAssertion`. It succeeds when that
+assertion fails:
+
+```csharp
+assertionChain
+    .ForFailingAssertion(() => BeEquivalentTo(unexpected, config))
+    .BecauseOf(because, becauseArgs)
+    .WithDefaultIdentifier(Identifier)
+    .FailWith("Expected {context} not to be equivalent to {0}{reason}, but they are.", unexpected);
+```
+
+Note that you pass the assertion you expect to *fail*, not an already negated one. A few things to keep in mind:
+
+* The failure messages of the reused assertion are discarded, because they describe the opposite expectation and would be
+  misleading. So you always have to provide your own message through `FailWith`.
+* The assertion is not executed at all when a prior assertion in the chain already failed, just like `ForCondition`.
+* The delegate has to return an `AndConstraint<T>`, which is what almost every assertion returns. That way the compiler
+  makes sure you actually pass an assertion, and its type parameter is inferred, so you never have to spell it out.
+* Whatever the reused assertion does to the chain it runs on stays invisible to your own assertion, so you are free to
+  call your own assertion methods or to start a fresh chain with `Subject.Should()`.
+
 ## Scoping your extensions
 
 Now what if you want to reuse your newly created extension method within some other extension method? For instance, what if you want to apply that assertion on a collection of directories? Wouldn't it be cool if you can tell your extension method about the current directory? This is where the `AssertionScope` comes into place.

@@ -19,15 +19,19 @@ namespace AwesomeAssertions.Execution;
 public sealed class AssertionChain
 {
     private readonly Func<AssertionScope> getCurrentScope;
-    private readonly ContextDataDictionary contextData = new();
-    private string fallbackIdentifier = "object";
-    private Func<string> getCallerIdentifier;
-    private Func<string> reason;
-    private bool? succeeded;
 
-    // We need to keep track of this because we don't want the second successful assertion hide the first unsuccessful assertion
-    private Func<string> expectation;
-    private string callerPostfix = string.Empty;
+    /// <summary>
+    /// Determines the caller identifier the way this chain was set up to do it.
+    /// </summary>
+    /// <remarks>
+    /// This is infrastructure of the chain and deliberately not part of <see cref="State"/>. It is composed once per
+    /// chain and must survive resetting the state for a nested assertion, whereas everything in <see cref="State"/>
+    /// describes a single assertion and must not leak into that nested assertion. The per-assertion counterpart is
+    /// <see cref="State.CallerIdentifierOverride"/>, which takes precedence as long as it is set.
+    /// </remarks>
+    private readonly Func<string> getDefaultCallerIdentifier;
+
+    private State state = new();
 
     private static readonly AsyncLocal<AssertionChain> Instance = new();
 
@@ -38,7 +42,8 @@ public sealed class AssertionChain
     /// <remarks>
     /// Can be overridden with <see cref="OverrideCallerIdentifier"/>.
     /// </remarks>
-    public string CallerIdentifier => getCallerIdentifier() + callerPostfix;
+    public string CallerIdentifier =>
+        (state.CallerIdentifierOverride ?? getDefaultCallerIdentifier)() + state.CallerPostfix;
 
     /// <summary>
     /// Exposes the options which will be used for formatting objects in case an assertion fails.
@@ -52,21 +57,13 @@ public sealed class AssertionChain
     /// This property is used to track if the caller identifier has been customized using the
     /// <see cref="OverrideCallerIdentifier"/> method or similar methods that modify the identifier.
     /// </remarks>
-    public bool HasOverriddenCallerIdentifier { get; private set; }
-
-    /// <summary>
-    /// Indicates whether the previous assertion in the chain was successful.
-    /// </summary>
-    /// <remarks>
-    /// This property is used internally to determine if subsequent assertions
-    /// should be evaluated based on the result of the previous assertion.
-    /// </remarks>
-    internal bool PreviousAssertionSucceeded { get; private set; } = true;
+    public bool HasOverriddenCallerIdentifier =>
+        state.CallerIdentifierOverride is not null || state.CallerPostfix.Length > 0;
 
     /// <summary>
     /// Gets a value indicating whether all assertions in the <see cref="AssertionChain"/> have succeeded.
     /// </summary>
-    public bool Succeeded => PreviousAssertionSucceeded && succeeded is null or true;
+    public bool Succeeded => state.PreviousAssertionSucceeded && state.Succeeded is null or true;
 
     /// <summary>
     /// Forces the objects involved in the assertion to be formatted using line breaks in the failure message.
@@ -109,7 +106,7 @@ public sealed class AssertionChain
     {
         this.getCurrentScope = getCurrentScope;
 
-        this.getCallerIdentifier = () =>
+        getDefaultCallerIdentifier = () =>
         {
             var scopeName = getCurrentScope().Name();
             var callerIdentifier = getCallerIdentifier();
@@ -154,7 +151,7 @@ public sealed class AssertionChain
     /// </param>
     public AssertionChain BecauseOf(string because, params object[] becauseArgs)
     {
-        reason = () =>
+        state.Reason = () =>
         {
             try
             {
@@ -186,9 +183,9 @@ public sealed class AssertionChain
     /// </remarks>
     public AssertionChain ForCondition(bool condition)
     {
-        if (PreviousAssertionSucceeded)
+        if (state.PreviousAssertionSucceeded)
         {
-            succeeded = condition;
+            state.Succeeded = condition;
         }
 
         return this;
@@ -206,9 +203,9 @@ public sealed class AssertionChain
     /// </remarks>
     public AssertionChain ForCondition(Func<bool> condition)
     {
-        if (PreviousAssertionSucceeded)
+        if (state.PreviousAssertionSucceeded)
         {
-            succeeded = condition();
+            state.Succeeded = condition();
         }
 
         return this;
@@ -227,12 +224,62 @@ public sealed class AssertionChain
     /// </remarks>
     public AssertionChain ForConstraint(OccurrenceConstraint constraint, int actualOccurrences)
     {
-        if (PreviousAssertionSucceeded)
+        if (state.PreviousAssertionSucceeded)
         {
-            constraint.RegisterContextData((key, value) => contextData.Add(
+            constraint.RegisterContextData((key, value) => state.ContextData.Add(
                 new ContextDataDictionary.DataItem(key, value, reportable: false, requiresFormatting: false)));
 
-            succeeded = constraint.Assert(actualOccurrences);
+            state.Succeeded = constraint.Assert(actualOccurrences);
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    /// Specifies that the assertion executed by <paramref name="failingAssertion"/> must fail for the current
+    /// assertion to succeed.
+    /// </summary>
+    /// <typeparam name="TAssertions">
+    /// The assertion class that <paramref name="failingAssertion"/> returns a constraint for. It is inferred from
+    /// that return value and never needs to be specified.
+    /// </typeparam>
+    /// <param name="failingAssertion">
+    /// The assertion that is expected to fail. This is typically the positive counterpart of the assertion being
+    /// implemented, such as <c>() => BeEquivalentTo(unexpected)</c> within <c>NotBeEquivalentTo</c>.
+    /// </param>
+    /// <remarks>
+    /// The assertion is not executed when a prior assertion in the chain already failed. Any failures it records are
+    /// discarded, because they describe the opposite expectation and would be misleading.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException"><paramref name="failingAssertion"/> is <see langword="null"/>.</exception>
+    public AssertionChain ForFailingAssertion<TAssertions>(Func<AndConstraint<TAssertions>> failingAssertion)
+    {
+        Guard.ThrowIfArgumentIsNull(failingAssertion);
+
+        if (state.PreviousAssertionSucceeded)
+        {
+            // The nested assertion changes the current chain's state, so we have to restore it afterwards.
+            State savedState = state;
+            var savedInstance = Instance.Value;
+
+            // and it must not see anything of the assertion that is being built here
+            state = new State();
+            Instance.Value = null;
+
+            using AssertionScope scope = new();
+            failingAssertion();
+
+            bool hasFailures = scope.HasFailures();
+
+            // we don't want to see the failures, because here they indicate that we were successful.
+            _ = scope.Discard();
+
+            // restore the state after the nested assertion
+            state = savedState;
+            Instance.Value = savedInstance;
+
+            // and update the success state
+            state.Succeeded = hasFailures;
         }
 
         return this;
@@ -285,22 +332,22 @@ public sealed class AssertionChain
 
     private Continuation WithExpectation(string message, Action<AssertionChain> chain, params object[] args)
     {
-        if (PreviousAssertionSucceeded)
+        if (state.PreviousAssertionSucceeded)
         {
-            expectation = () =>
+            state.Expectation = () =>
             {
                 var formatter = new FailureMessageFormatter(getCurrentScope().FormattingOptions)
-                    .WithReason(reason?.Invoke() ?? string.Empty)
-                    .WithContext(contextData)
+                    .WithReason(state.Reason?.Invoke() ?? string.Empty)
+                    .WithContext(state.ContextData)
                     .WithIdentifier(CallerIdentifier)
-                    .WithFallbackIdentifier(fallbackIdentifier);
+                    .WithFallbackIdentifier(state.FallbackIdentifier);
 
                 return formatter.Format(message, args);
             };
 
             chain(this);
 
-            expectation = null;
+            state.Expectation = null;
         }
 
         return new Continuation(this);
@@ -313,7 +360,7 @@ public sealed class AssertionChain
     /// <param name="identifier">The fallback identifier to use in the failure message.</param>
     public AssertionChain WithDefaultIdentifier(string identifier)
     {
-        fallbackIdentifier = identifier;
+        state.FallbackIdentifier = identifier;
         return this;
     }
 
@@ -381,10 +428,9 @@ public sealed class AssertionChain
     [StackTraceHidden]
     public Continuation FailWith(string message, params Func<object>[] argProviders)
     {
-        return FailWith(
-            () => new FailReason(
-                message,
-                argProviders.Select(a => a()).ToArray()));
+        return FailWith(() => new FailReason(
+            message,
+            argProviders.Select(a => a()).ToArray()));
     }
 
     /// <summary>
@@ -401,10 +447,10 @@ public sealed class AssertionChain
         return FailWith(() =>
         {
             var formatter = new FailureMessageFormatter(getCurrentScope().FormattingOptions)
-                .WithReason(reason?.Invoke() ?? string.Empty)
-                .WithContext(contextData)
+                .WithReason(state.Reason?.Invoke() ?? string.Empty)
+                .WithContext(state.ContextData)
                 .WithIdentifier(CallerIdentifier)
-                .WithFallbackIdentifier(fallbackIdentifier);
+                .WithFallbackIdentifier(state.FallbackIdentifier);
 
             FailReason failReason = getFailureReason();
 
@@ -415,17 +461,17 @@ public sealed class AssertionChain
     [StackTraceHidden]
     private Continuation FailWith(Func<string> getFailureReason)
     {
-        if (PreviousAssertionSucceeded)
+        if (state.PreviousAssertionSucceeded)
         {
-            PreviousAssertionSucceeded = succeeded is true;
+            state.PreviousAssertionSucceeded = state.Succeeded is true;
 
-            if (succeeded is not true)
+            if (state.Succeeded is not true)
             {
                 string failure = getFailureReason();
 
-                if (expectation is not null)
+                if (state.Expectation is not null)
                 {
-                    failure = expectation() + failure;
+                    failure = state.Expectation() + failure;
                 }
 
                 getCurrentScope().AddPreFormattedFailure(failure.Capitalize().RemoveTrailingWhitespaceFromLines());
@@ -433,7 +479,7 @@ public sealed class AssertionChain
         }
 
         // Reset the state for successive assertions on this object
-        succeeded = null;
+        state.Succeeded = null;
 
         return new Continuation(this);
     }
@@ -444,8 +490,7 @@ public sealed class AssertionChain
     /// </summary>
     public void OverrideCallerIdentifier(Func<string> getCallerIdentifier)
     {
-        this.getCallerIdentifier = getCallerIdentifier;
-        HasOverriddenCallerIdentifier = true;
+        state.CallerIdentifierOverride = getCallerIdentifier;
     }
 
     /// <summary>
@@ -458,8 +503,7 @@ public sealed class AssertionChain
     /// </remarks>
     public AssertionChain WithCallerPostfix(string postfix)
     {
-        callerPostfix = postfix;
-        HasOverriddenCallerIdentifier = true;
+        state.CallerPostfix = postfix;
 
         return this;
     }
@@ -541,5 +585,30 @@ public sealed class AssertionChain
     internal void AddPreFormattedFailure(string failure)
     {
         getCurrentScope().AddPreFormattedFailure(failure);
+    }
+
+    private sealed class State
+    {
+        public ContextDataDictionary ContextData { get; } = new();
+
+        public string FallbackIdentifier { get; set; } = "object";
+
+        // The caller identification set through <see cref="OverrideCallerIdentifier"/>,
+        // or <see langword="null"/> when the chain determines the caller itself.
+        public Func<string> CallerIdentifierOverride { get; set; }
+
+        public Func<string> Reason { get; set; }
+
+        public bool? Succeeded { get; set; }
+
+        // The expectation that WithExpectation installs for the duration of its callback. FailWith prepends it to the
+        // failure reason, so that several FailWith calls can share one expectation. Null means there is none.
+        public Func<string> Expectation { get; set; }
+
+        public string CallerPostfix { get; set; } = string.Empty;
+
+        // Unlike Succeeded, which FailWith resets after every single assertion, this latches: once an assertion in the
+        // chain failed, it stays false, so a later successful assertion cannot make the chain look successful again.
+        public bool PreviousAssertionSucceeded { get; set; } = true;
     }
 }

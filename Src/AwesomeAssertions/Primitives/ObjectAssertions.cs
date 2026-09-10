@@ -391,16 +391,8 @@ public class ObjectAssertions<TSubject, TAssertions> : ReferenceTypeAssertions<T
     {
         Guard.ThrowIfArgumentIsNull(config);
 
-        bool hasMismatches;
-
-        using (var scope = new AssertionScope())
-        {
-            BeEquivalentTo(unexpected, config);
-            hasMismatches = scope.Discard().Length > 0;
-        }
-
         assertionChain
-            .ForCondition(hasMismatches)
+            .ForFailingAssertion(() => BeEquivalentTo(unexpected, config))
             .BecauseOf(because, becauseArgs)
             .WithDefaultIdentifier(Identifier)
             .FailWith("Expected {context} not to be equivalent to {0}{reason}, but they are.", unexpected);

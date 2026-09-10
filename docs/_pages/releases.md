@@ -49,6 +49,7 @@ sidebar:
 * Add documentation to all public API - [#556](https://github.com/AwesomeAssertions/AwesomeAssertions/pull/556)
 * Add `ExcludingObsoleteMembers` to `SelfReferenceEquivalencyOptions` allowing obsolete members to be ignored in structural comparison - [#558](https://github.com/AwesomeAssertions/AwesomeAssertions/pull/558)
   * Please note that the interface `IEquivalencyOptions` has been marked as "technically public" and not part of the public API.
+* Add `AssertionChain.ForFailingAssertion` which allows building an assertion on top of the assertion it is the opposite of, instead of repeating its logic - [#272](https://github.com/AwesomeAssertions/AwesomeAssertions/issues/272)
 
 ### Fixes
 * Fix duplicate matching rules - [#566](https://github.com/AwesomeAssertions/AwesomeAssertions/pull/566)

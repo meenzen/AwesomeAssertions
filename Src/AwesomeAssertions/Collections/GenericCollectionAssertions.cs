@@ -2050,25 +2050,12 @@ public class GenericCollectionAssertions<TCollection, T, TAssertions> : Referenc
     {
         Guard.ThrowIfArgumentIsNull(unexpected, nameof(unexpected), "Cannot verify inequivalence against a <null> collection.");
 
-        if (Subject is null)
-        {
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .FailWith("Expected {context:collection} not to be equivalent{reason}, but found <null>.");
-        }
-
-        string[] failures;
-
-        using (var scope = new AssertionScope())
-        {
-            BeEquivalentTo(unexpected, config);
-
-            failures = scope.Discard();
-        }
-
         assertionChain
-            .ForCondition(failures.Length > 0)
+            .ForCondition(Subject is not null)
             .BecauseOf(because, becauseArgs)
+            .FailWith("Expected {context:collection} not to be equivalent{reason}, but found <null>.")
+            .Then
+            .ForFailingAssertion(() => BeEquivalentTo(unexpected, config))
             .FailWith("Expected {context:collection} {0} not to be equivalent to collection {1}{reason}.", Subject,
                 unexpected);
 

@@ -581,7 +581,7 @@ public partial class StringAssertionSpecs
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Did not expect string to contain the equivalent of \", worLD!\" but found \"Hello, world!\".");
+                .WithMessage("Did not expect string to contain the equivalent of \", worLD!\", but found \"Hello, world!\".");
         }
 
         [Fact]

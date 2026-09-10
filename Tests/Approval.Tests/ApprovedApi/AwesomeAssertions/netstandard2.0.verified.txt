@@ -1412,6 +1412,7 @@ namespace AwesomeAssertions.Execution
         public AwesomeAssertions.Execution.AssertionChain ForCondition(System.Func<bool> condition) { }
         public AwesomeAssertions.Execution.AssertionChain ForCondition(bool condition) { }
         public AwesomeAssertions.Execution.AssertionChain ForConstraint(AwesomeAssertions.OccurrenceConstraint constraint, int actualOccurrences) { }
+        public AwesomeAssertions.Execution.AssertionChain ForFailingAssertion<TAssertions>(System.Func<AwesomeAssertions.AndConstraint<TAssertions>> failingAssertion) { }
         public AwesomeAssertions.Execution.GivenSelector<T> Given<T>(System.Func<T> selector) { }
         public void OverrideCallerIdentifier(System.Func<string> getCallerIdentifier) { }
         public void ReuseOnce() { }

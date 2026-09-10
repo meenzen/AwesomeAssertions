@@ -240,5 +240,17 @@ public partial class StringAssertionSpecs
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected someString not to start with \"ABC\", but found <null>.");
         }
+
+        [Fact]
+        public void When_asserting_string_does_not_start_with_a_value_and_also_with_a_value_it_actually_starts_it_should_throw()
+        {
+            // Act
+            const string someString = "ABC";
+            Action act = () => someString.Should().NotStartWith("XYZ").And.NotStartWith("ABC");
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "Expected someString not to start with \"ABC\", but found \"ABC\".");
+        }
     }
 }
